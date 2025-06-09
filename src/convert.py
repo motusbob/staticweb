@@ -104,16 +104,16 @@ def split_nodes_link(old_nodes):
     return new_nodes
 
 def text_to_textnodes(text):
-#    print("\n\n", text)
     new_nodes = split_nodes_link(text)
-#    print("\n\n", new_nodes)
     new_nodes = split_nodes_image(new_nodes)
-#    print("\n\n", new_nodes)
     new_nodes = split_nodes_delimiter(new_nodes, "**", TextType.BOLD)
-#    print("\n\n", new_nodes)
     new_nodes = split_nodes_delimiter(new_nodes, "_", TextType.ITALIC)
-#    print("\n\n", new_nodes)
     new_nodes = split_nodes_delimiter(new_nodes, "`", TextType.CODE)
-#    print("\n\n", new_nodes)
     return new_nodes
+
+def markdown_to_blocks(markdown):
+    blocks = [block.strip() for block in markdown.split("\n\n")]
+    return blocks
+
+
 
