@@ -1,11 +1,14 @@
 from textnode import TextNode, TextType
 from leafnode import LeafNode
+from blocknode import BlockType, block_to_block_type
+from htmlnode import HTMLNode
+from parentnode import ParentNode
 import re
 
 def text_node_to_html_node(text_node):
     match text_node.text_type:
         case TextType.TEXT:
-            return LeafNode(None, text_node.text)
+            return LeafNode(None, text_node.text.replace("\n"," "))
         case TextType.BOLD:
             return LeafNode("b", text_node.text)
         case TextType.ITALIC:
@@ -117,3 +120,43 @@ def markdown_to_blocks(markdown):
 
 
 
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    node_list = []
+#    print(blocks)
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        #print(block_type)
+        match block_type:
+            case BlockType.PARAGRAPH:
+                node = [TextNode(block, TextType.TEXT)]
+                new_node = text_to_textnodes(node)
+                extra_html = []
+                for node in new_node:
+                    extra_html.append(text_node_to_html_node(node))
+                if len(extra_html) != 0:
+                    parn_node = ParentNode("p", extra_html) # p node over test
+                    node_list.append(parn_node)
+            case BlockType.HEADING:  # TODO TODO
+                hash_count = block.count('#')
+                html_node = HTMLNode(f"h{hash_count}", block)
+                print(html_node)
+            case BlockType.CODE:
+                code_text = block.strip("```\n")
+                code_text = code_text.split("\n")
+                code_text = "\n".join(code_text)+"\n"
+                html_node = LeafNode("code", code_text) # code node
+                pre_node = ParentNode("pre", [html_node]) # pre node over code node
+                node_list.append(pre_node)
+            case BlockType.QUOTE:  # TODO TODO
+                html_node = HTMLNode("blockquote", block)
+                print(html_block)
+            case BlockType.UNORDERED_LIST:  # TODO TODO
+                html_node = HTMLNode("ul", block) # with li child
+                print(html_node)
+            case BlockType.ORDERED_LIST:  # TODO TODO
+                html_node = HTMLNode("ol", block) # with li child
+                print(html_node)
+            case _:
+                raise Exception("Unknown Markdown")
+    return ParentNode("div", node_list)
