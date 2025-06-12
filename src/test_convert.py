@@ -229,7 +229,62 @@ the **same** even with inline stuff
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
-    
+
+    def test_headers(self):
+        md = """
+# This is header 1
+
+## This is header 2
+
+### This is header 3
+
+#### This is header 4
+
+##### This is header 5
+
+###### This is header 6
+
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        #print(html)
+        self.assertEqual(html, "<div><h1>This is header 1</h1><h2>This is header 2</h2><h3>This is header 3</h3><h4>This is header 4</h4><h5>This is header 5</h5><h6>This is header 6</h6></div>",)
+
+    def test_blockquote(self):
+        md = """
+> this is a quote
+
+> this is another quote
+
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        #print(html)
+        self.assertEqual(html, "<div><blockquote>this is a quote</blockquote><blockquote>this is another quote</blockquote></div>",)
+
+    def test_ol(self):
+        md = """
+1. item 1
+2. item 2
+3. item 4
+
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        #print(html)
+        self.assertEqual(html, "<div><ol><li>item 1</li><li>item 2</li><li>item 4</li></ol></div>",)
+
+    def test_ul(self):
+        md = """
+- item 1
+- item 2
+- item 4
+
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        #print(html)
+        self.assertEqual(html, "<div><ul><li>item 1</li><li>item 2</li><li>item 4</li></ul></div>",)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ def text_node_to_html_node(text_node):
         case TextType.CODE:
             return LeafNode("code", text_node.text)
         case TextType.LINK:
-            return Leafnode("a", text_node.text, None, {"href": f"{text_node.url}"})
+            return LeafNode("a", text_node.text, {"href": f"{text_node.url}"})
         case TextType.IMAGE:
             return LeafNode("img", "", {"src": f"{text_node.url}", "alt": text_node.text})
         case _:
@@ -66,7 +66,7 @@ def split_nodes_image(old_nodes):
             new_nodes.append(node)
         else:
             image_info = extract_markdown_images(node.text)
-            if image_info == None:
+            if image_info is None:
                 new_nodes.append(node)
             else:
                 work_text = node.text
@@ -90,7 +90,7 @@ def split_nodes_link(old_nodes):
             new_nodes.append(node)
         else:
             link_info = extract_markdown_links(node.text)
-            if link_info == None:
+            if link_info is None:
                 new_nodes.append(node)
             else:
                 work_text = node.text
@@ -137,10 +137,13 @@ def markdown_to_html_node(markdown):
                 if len(extra_html) != 0:
                     parn_node = ParentNode("p", extra_html) # p node over test
                     node_list.append(parn_node)
-            case BlockType.HEADING:  # TODO TODO
-                hash_count = block.count('#')
-                html_node = HTMLNode(f"h{hash_count}", block)
-                print(html_node)
+            case BlockType.HEADING:
+                node = [TextNode(block, TextType.TEXT)]
+                for n in node:
+                    hash_count = n.text.count('#')
+                    n.text = n.text.lstrip("#").lstrip()
+                    new_node = LeafNode(f"h{hash_count}", n.text) # header node with #count
+                    node_list.append(new_node)
             case BlockType.CODE:
                 code_text = block.strip("```\n")
                 code_text = code_text.split("\n")
@@ -148,15 +151,33 @@ def markdown_to_html_node(markdown):
                 html_node = LeafNode("code", code_text) # code node
                 pre_node = ParentNode("pre", [html_node]) # pre node over code node
                 node_list.append(pre_node)
-            case BlockType.QUOTE:  # TODO TODO
-                html_node = HTMLNode("blockquote", block)
-                print(html_block)
-            case BlockType.UNORDERED_LIST:  # TODO TODO
-                html_node = HTMLNode("ul", block) # with li child
-                print(html_node)
+            case BlockType.QUOTE:
+                node = [TextNode(block, TextType.TEXT)]
+                for n in node:
+                    n.text = n.text.lstrip(">").lstrip()
+                    this_tag = "blockquote"
+                    new_node = LeafNode(this_tag, n.text)
+                    node_list.append(new_node)
+            case BlockType.UNORDERED_LIST:
+                node_text = block[2:].split("\n")
+                list_node = []
+                for node in node_text:
+                    text = node.lstrip("- ")
+                    new_node = LeafNode("li", text)  # header node with #count
+                    list_node.append(new_node)
+                node_list.append(ParentNode("ul", list_node)) # with li child
+
             case BlockType.ORDERED_LIST:  # TODO TODO
-                html_node = HTMLNode("ol", block) # with li child
-                print(html_node)
+                node_text = block.split("\n")
+                list_node = []
+                for node in node_text:
+                    index_space = [pos for pos, char in enumerate(node) if char == " "]
+                    first_space = index_space.pop(0)
+                    text = node[first_space+1:]
+                    new_node = LeafNode("li", text)  # header node with #count
+                    list_node.append(new_node)
+                node_list.append(ParentNode("ol", list_node)) # with li child
             case _:
                 raise Exception("Unknown Markdown")
-    return ParentNode("div", node_list)
+
+    return ParentNode("div", node_list) # overall parent node

@@ -23,7 +23,7 @@ def block_to_block_type(block):
         return BlockType.QUOTE
     elif len(re.findall(r"^- .*$", block, re.MULTILINE)) == len(block.split("\n")):
         return BlockType.UNORDERED_LIST
-    elif len(re.findall(r"^\* .*$", block, re.MULTILINE)) == len(block.split("\n")):
+    elif len(re.findall(r"^[0-9]+\. .*$", block, re.MULTILINE)) == len(block.split("\n")):
         return BlockType.ORDERED_LIST
     else:
         return BlockType.PARAGRAPH
