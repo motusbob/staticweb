@@ -84,7 +84,7 @@ def main():
 
     print("## STARTING PROGRAM ##")
     source_dir = "static"
-    destination_dir = "public"
+    destination_dir = "docs"
     copy_from_dir_to_dir(source_dir, destination_dir)
 
     generate_pages_recursive("content", "template.html", "docs", basepath)
