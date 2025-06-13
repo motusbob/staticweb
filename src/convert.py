@@ -39,12 +39,13 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         else:
             if delimiter in node.text:
                 split_node = node.text.split(delimiter)
-                if len(split_node) != 3:
-                    raise Exception("invalid markdown")
-                new_nodes.append(TextNode(split_node[0], TextType.TEXT))
-                new_nodes.append(TextNode(split_node[1], node_type))
-                if len(split_node) > 2 and len(split_node[2]) > 0:
-                    new_nodes.append(TextNode(split_node[2], TextType.TEXT))
+                #print(split_node, len(split_node))
+                for idx, n in enumerate(split_node):
+                    if idx % 2 == 0:
+                        new_nodes.append(TextNode(split_node[idx], TextType.TEXT))
+                    else:
+                        new_nodes.append(TextNode(split_node[idx], node_type))
+
     return new_nodes
 
 def extract_markdown_images(text):
@@ -142,7 +143,14 @@ def markdown_to_html_node(markdown):
                 for n in node:
                     hash_count = n.text.count('#')
                     n.text = n.text.lstrip("#").lstrip()
-                    new_node = LeafNode(f"h{hash_count}", n.text) # header node with #count
+                    text_node = [TextNode(n.text, TextType.TEXT)]
+                    updated_node = text_to_textnodes(text_node)
+#                    print(updated_node)
+                    this_node_text = ""
+                    for n in updated_node:
+                        if len(n.text) != 0:
+                            this_node_text += text_node_to_html_node(n).to_html()
+                    new_node = LeafNode(f"h{hash_count}", this_node_text) # header node with #count
                     node_list.append(new_node)
             case BlockType.CODE:
                 code_text = block.strip("```\n")
@@ -154,18 +162,30 @@ def markdown_to_html_node(markdown):
             case BlockType.QUOTE:
                 node = [TextNode(block, TextType.TEXT)]
                 for n in node:
-                    n.text = n.text.lstrip(">").lstrip()
-                    this_tag = "blockquote"
-                    new_node = LeafNode(this_tag, n.text)
-                    node_list.append(new_node)
+                    n.text = n.text.strip().replace(">","").lstrip().replace("\n","")
+                    if len(n.text) != 0:
+                        this_tag = "blockquote"
+                        new_node = LeafNode(this_tag, n.text)
+                        node_list.append(new_node)
+
+
             case BlockType.UNORDERED_LIST:
-                node_text = block[2:].split("\n")
+                node_text = block.replace("- ","").split("\n")
                 list_node = []
                 for node in node_text:
-                    text = node.lstrip("- ")
-                    new_node = LeafNode("li", text)  # header node with #count
-                    list_node.append(new_node)
+                    text_node = [TextNode(node, TextType.TEXT)]
+                    updated_node = text_to_textnodes(text_node)
+                    this_node_text = ""
+                    for n in updated_node:
+                        if len(n.text) != 0:
+#                            print(text_node_to_html_node(n).to_html())
+                            this_node_text += text_node_to_html_node(n).to_html()
+
+                    list_node.append(LeafNode("li", this_node_text))
+                    #list_node.append(list_item)
+#                print("final list node", list_node)
                 node_list.append(ParentNode("ul", list_node)) # with li child
+
 
             case BlockType.ORDERED_LIST:  # TODO TODO
                 node_text = block.split("\n")
@@ -173,9 +193,13 @@ def markdown_to_html_node(markdown):
                 for node in node_text:
                     index_space = [pos for pos, char in enumerate(node) if char == " "]
                     first_space = index_space.pop(0)
-                    text = node[first_space+1:]
-                    new_node = LeafNode("li", text)  # header node with #count
-                    list_node.append(new_node)
+                    text_node =[TextNode(node[first_space+1:], TextType.TEXT)]
+                    updated_node = text_to_textnodes(text_node)
+                    this_node_text = ""
+                    for n in updated_node:
+                        if len(n.text) != 0:
+                            this_node_text += text_node_to_html_node(n).to_html()
+                    list_node.append(LeafNode("li", this_node_text))
                 node_list.append(ParentNode("ol", list_node)) # with li child
             case _:
                 raise Exception("Unknown Markdown")

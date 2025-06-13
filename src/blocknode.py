@@ -19,7 +19,7 @@ def block_to_block_type(block):
     #elif block[0:3] == "```" and block[-3:] == "```":
     elif len(re.findall(r"^```(\n|.)*?```$", block, re.MULTILINE)) == 1:
         return BlockType.CODE
-    elif len(re.findall(r"^> .*$", block, re.MULTILINE)) == len(block.split("\n")):
+    elif len(re.findall(r"^>(\n|.)*?$", block, re.MULTILINE)) == len(block.split("\n")):
         return BlockType.QUOTE
     elif len(re.findall(r"^- .*$", block, re.MULTILINE)) == len(block.split("\n")):
         return BlockType.UNORDERED_LIST

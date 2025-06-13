@@ -252,19 +252,19 @@ the **same** even with inline stuff
 
     def test_blockquote(self):
         md = """
-> this is a quote
-
-> this is another quote
+> "I am in fact a Hobbit in all but size."
+>
+> -- J.R.R. Tolkien
 
 """
         node = markdown_to_html_node(md)
         html = node.to_html()
         #print(html)
-        self.assertEqual(html, "<div><blockquote>this is a quote</blockquote><blockquote>this is another quote</blockquote></div>",)
+        self.assertEqual(html, '<div><blockquote>"I am in fact a Hobbit in all but size." -- J.R.R. Tolkien</blockquote></div>',)
 
     def test_ol(self):
         md = """
-1. item 1
+1. **item 1**
 2. item 2
 3. item 4
 
@@ -272,19 +272,19 @@ the **same** even with inline stuff
         node = markdown_to_html_node(md)
         html = node.to_html()
         #print(html)
-        self.assertEqual(html, "<div><ol><li>item 1</li><li>item 2</li><li>item 4</li></ol></div>",)
+        self.assertEqual(html, "<div><ol><li><b>item 1</b></li><li>item 2</li><li>item 4</li></ol></div>",)
 
     def test_ul(self):
         md = """
 - item 1
-- item 2
+- _item 2_
 - item 4
 
 """
         node = markdown_to_html_node(md)
         html = node.to_html()
         #print(html)
-        self.assertEqual(html, "<div><ul><li>item 1</li><li>item 2</li><li>item 4</li></ul></div>",)
+        self.assertEqual(html, "<div><ul><li>item 1</li><li><i>item 2</i></li><li>item 4</li></ul></div>",)
 
 
 if __name__ == "__main__":

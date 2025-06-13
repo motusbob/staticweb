@@ -51,12 +51,12 @@ followed by more lines of code```"""
         self.assertEqual(BlockType.UNORDERED_LIST, block_to_block_type(markdown))
 
     def test_ol(self):
-        markdown = "* some quote"
+        markdown = "1. some quote"
         self.assertEqual(BlockType.ORDERED_LIST, block_to_block_type(markdown))
 
     def test_ordered_list_multiline(self):
-        markdown = """* this is a line of list
-* and this is another line of list"""
+        markdown = """1. this is a line of list
+2. and this is another line of list"""
         self.assertEqual(BlockType.ORDERED_LIST, block_to_block_type(markdown))
 
     def test_paragraph(self):
