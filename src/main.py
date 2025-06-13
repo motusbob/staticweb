@@ -2,6 +2,7 @@ import os
 import shutil
 from textnode import TextNode, TextType
 from convert import *
+import sys
 
 def create_dir(destination):
     if not os.path.exists(destination):
@@ -42,7 +43,7 @@ def extract_title(markdown):
         else:
             raise Exception("No title found")
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"\n- Generating page from {from_path} to {dest_path} using {template_path}.")
 
     with open(from_path, "r") as content_file:
@@ -55,33 +56,38 @@ def generate_page(from_path, template_path, dest_path):
     
     template = template.replace("{{ Title }}", title)
     template = template.replace("{{ Content }}", html)
-
-    with open(dest_path, "w") as dest_html:
+    template = template.replace('href="/', f'href="{basepath}')
+    template = template.replace('src="/', f'src="{basepath}')
+    with open(f"{dest_path}", "w") as dest_html:
         dest_html.write(template)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
-    if not os.path.exists(dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
+    if not os.path.exists(f"{basepath}{dest_dir_path}"):
         create_dir(dest_dir_path)
     for filename in os.listdir(dir_path_content):
         if os.path.isfile(f"{dir_path_content}/{filename}"):
             print(f"- Generating file {dir_path_content}/{filename} into {dest_dir_path}")
-            generate_page(f"{dir_path_content}/{filename}", template_path, f"{dest_dir_path}/{filename.replace('.md','.html')}")
+            generate_page(f"{dir_path_content}/{filename}", template_path, f"{dest_dir_path}/{filename.replace('.md','.html')}", basepath)
         elif os.path.isdir(f"{dir_path_content}/{filename}"):
             print(f"- Found directory {dir_path_content}/{filename}")
-            generate_pages_recursive(f"{dir_path_content}/{filename}", template_path, f"{dest_dir_path}/{filename}")
+            generate_pages_recursive(f"{dir_path_content}/{filename}", template_path, f"{dest_dir_path}/{filename}", basepath)
         else:
             raise Exception(f"Unkown file/dir {dir_path_content}/{filename} found")
 
 def main():
     #Node = TextNode("This is some anchor text", TextType.LINK, "https://www.boot.dev")
     #print(Node)
+    basepath = "/"
+    if len(sys.argv) == 2:
+        basepath = sys.argv[1]
+
     print("## STARTING PROGRAM ##")
     source_dir = "static"
     destination_dir = "public"
     copy_from_dir_to_dir(source_dir, destination_dir)
 
-    generate_pages_recursive("content", "template.html", "public")
+    generate_pages_recursive("content", "template.html", "docs", basepath)
  
 if __name__ == "__main__":
     main()
